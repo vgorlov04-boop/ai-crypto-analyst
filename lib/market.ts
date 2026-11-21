@@ -1,8 +1,9 @@
 // Shared (client-safe) market constants and types for AI Crypto Analyst.
 
-export const SYMBOLS = ['BTCUSDT', 'ETHUSDT', 'SOLUSDT'] as const
+// Default watchlist: nine Binance Spot USDT pairs.
+export const SYMBOLS = ['BTCUSDT', 'ETHUSDT', 'SOLUSDT', 'BNBUSDT', 'XRPUSDT', 'ADAUSDT', 'DOGEUSDT', 'AVAXUSDT', 'GRAMUSDT'] as const
 
-export type SymbolKey = (typeof SYMBOLS)[number]
+export type SymbolKey = string
 
 export const INTERVALS = ['15m', '1h', '4h', '1d'] as const
 
@@ -22,10 +23,17 @@ export interface SymbolMeta {
   accent: string
 }
 
-export const SYMBOL_META: Record<SymbolKey, SymbolMeta> = {
+export const SYMBOL_META: Record<string, SymbolMeta> = {
   BTCUSDT: { symbol: 'BTCUSDT', base: 'BTC', name: 'Bitcoin', accent: '#f7931a' },
   ETHUSDT: { symbol: 'ETHUSDT', base: 'ETH', name: 'Ethereum', accent: '#8b93ff' },
   SOLUSDT: { symbol: 'SOLUSDT', base: 'SOL', name: 'Solana', accent: '#14f195' },
+  BNBUSDT: { symbol: 'BNBUSDT', base: 'BNB', name: 'BNB', accent: '#f3ba2f' },
+  XRPUSDT: { symbol: 'XRPUSDT', base: 'XRP', name: 'XRP', accent: '#346aa9' },
+  ADAUSDT: { symbol: 'ADAUSDT', base: 'ADA', name: 'Cardano', accent: '#3468d1' },
+  DOGEUSDT: { symbol: 'DOGEUSDT', base: 'DOGE', name: 'Dogecoin', accent: '#c3a634' },
+  LINKUSDT: { symbol: 'LINKUSDT', base: 'LINK', name: 'Chainlink', accent: '#2a5ada' },
+  AVAXUSDT: { symbol: 'AVAXUSDT', base: 'AVAX', name: 'Avalanche', accent: '#e84142' },
+  GRAMUSDT: { symbol: 'GRAMUSDT', base: 'GRAM', name: 'Gram (formerly Toncoin)', accent: '#0088cc' },
 }
 
 export interface TickerData {
@@ -122,7 +130,16 @@ export interface ApiError {
 }
 
 export function isSymbolKey(value: string | null | undefined): value is SymbolKey {
-  return !!value && (SYMBOLS as readonly string[]).includes(value)
+  return !!value && /^[A-Z0-9]{2,16}USDT$/.test(value)
+}
+
+export function getSymbolMeta(symbol: string): SymbolMeta {
+  return SYMBOL_META[symbol] ?? {
+    symbol,
+    base: symbol.replace(/USDT$/, ''),
+    name: symbol.replace(/USDT$/, ''),
+    accent: '#60a5fa',
+  }
 }
 
 export function isInterval(value: string | null | undefined): value is Interval {

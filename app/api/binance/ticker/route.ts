@@ -22,10 +22,10 @@ export async function GET(request: Request) {
       }
       requested = [upper]
     } else if (symbolsParam) {
-      const parts = symbolsParam
+      const parts = [...new Set(symbolsParam
         .split(',')
         .map((item: string) => item.trim().toUpperCase())
-        .filter(isSymbolKey)
+        .filter(isSymbolKey))]
       if (parts.length === 0) {
         return NextResponse.json(
           { ok: false, error: 'Неподдерживаемый торговый символ' },

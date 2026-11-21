@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react'
 import dynamic from 'next/dynamic'
 import { motion } from 'framer-motion'
 import {
@@ -13,7 +13,11 @@ import {
   ShieldCheck,
   Sparkles,
   WifiOff,
+  Plus,
+  X,
+  Search,
 } from 'lucide-react'
+import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { PriceCard } from '@/components/price-card'
 import { IndicatorsPanel } from '@/components/indicators-panel'
@@ -24,7 +28,7 @@ import {
   INTERVALS,
   INTERVAL_LABELS,
   SYMBOLS,
-  SYMBOL_META,
+  getSymbolMeta,
   pricePrecision,
   type Candle,
   type IndicatorsResponse,
@@ -62,6 +66,11 @@ function LegendDot({ color, label }: { color: string; label: string }) {
 }
 
 export function MarketDashboard() {
+  const [symbols, setSymbols] = useState<string[]>([...SYMBOLS])
+  const [watchlistReady, setWatchlistReady] = useState(false)
+  const [newTicker, setNewTicker] = useState('')
+  const [tickerSearchLoading, setTickerSearchLoading] = useState(false)
+  const [watchlistError, setWatchlistError] = useState<string | null>(null)
   const [tickers, setTickers] = useState<Record<string, TickerData>>({})
   const [tickerError, setTickerError] = useState<string | null>(null)
   const [tickerUpdatedAt, setTickerUpdatedAt] = useState<number | null>(null)
@@ -79,7 +88,7 @@ export function MarketDashboard() {
 
   const loadTickers = useCallback(async () => {
     try {
-      const response = await fetch(`/api/binance/ticker?symbols=${SYMBOLS.join(',')}`, {
+      const response = await fetch(`/api/binance/ticker?symbols=${symbols.join(',')}`, {
         cache: 'no-store',
       })
       const json = await response.json()
@@ -91,13 +100,13 @@ export function MarketDashboard() {
       for (const item of list) {
         if (item?.symbol) map[item.symbol] = item
       }
-      setTickers(map)
+      setTickers((current) => ({ ...current, ...map }))
       setTickerUpdatedAt(Date.now())
       setTickerError(null)
     } catch (error) {
       setTickerError(error instanceof Error ? error.message : 'Не удалось загрузить котировки')
     }
-  }, [])
+  }, [symbols])
 
   const loadAnalysis = useCallback(async (nextSymbol: SymbolKey, nextInterval: Interval, silent = false) => {
     const requestId = analysisRequestRef.current + 1
@@ -140,6 +149,35 @@ export function MarketDashboard() {
   }, [])
 
   useEffect(() => {
+    try {
+      const stored = window.localStorage.getItem('ai-crypto-analyst.watchlist')
+      if (stored) {
+        const parsed: unknown = JSON.parse(stored)
+        if (Array.isArray(parsed)) {
+          const valid = [...new Set(parsed.filter((item): item is string => typeof item === 'string' && item !== 'APEXUSDT' && /^[A-Z0-9]{2,16}USDT$/.test(item)))]
+          if (valid.length) {
+            setSymbols(valid)
+            setSymbol((current) => valid.includes(current) ? current : valid[0])
+          }
+        }
+      }
+    } catch {
+      // Storage can be disabled by browser privacy settings; keep the defaults in memory.
+    }
+    setWatchlistReady(true)
+  }, [])
+
+  useEffect(() => {
+    if (watchlistReady) {
+      try {
+        window.localStorage.setItem('ai-crypto-analyst.watchlist', JSON.stringify(symbols))
+      } catch {
+        // Keep the watchlist usable for this session when storage is unavailable.
+      }
+    }
+  }, [symbols, watchlistReady])
+
+  useEffect(() => {
     void loadTickers()
   }, [loadTickers])
 
@@ -170,12 +208,51 @@ export function MarketDashboard() {
     }
   }, [loadTickers, loadAnalysis, symbol, timeframe])
 
+  const addTicker = useCallback(async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    const normalized = newTicker.trim().toUpperCase().replace(/\s+/g, '')
+    const pair = normalized.endsWith('USDT') ? normalized : `${normalized}USDT`
+    if (!/^[A-Z0-9]{2,16}USDT$/.test(pair)) {
+      setWatchlistError('Введите тикер монеты, например BTC или GRAMUSDT.')
+      return
+    }
+    if (symbols.includes(pair)) {
+      setWatchlistError(`${pair} уже есть в списке.`)
+      return
+    }
+    setTickerSearchLoading(true)
+    setWatchlistError(null)
+    try {
+      const response = await fetch(`/api/binance/ticker?symbol=${encodeURIComponent(pair)}`, { cache: 'no-store' })
+      const json = await response.json()
+      if (!response.ok || !json?.ok || !Array.isArray(json.data) || !json.data.some((item: TickerData) => item.symbol === pair)) {
+        throw new Error(json?.error ?? `Пара ${pair} не найдена на Binance.`)
+      }
+      setSymbols((current) => current.includes(pair) ? current : [...current, pair])
+      setTickers((current) => ({ ...current, [pair]: json.data.find((item: TickerData) => item.symbol === pair) }))
+      setNewTicker('')
+    } catch (error) {
+      setWatchlistError(error instanceof Error ? error.message : 'Не удалось найти эту монету на Binance.')
+    } finally {
+      setTickerSearchLoading(false)
+    }
+  }, [newTicker, symbols])
+
+  const removeTicker = useCallback((removed: string) => {
+    setSymbols((current) => {
+      const next = current.filter((item) => item !== removed)
+      if (!next.length) return current
+      if (symbol === removed) setSymbol(next[0])
+      return next
+    })
+  }, [symbol])
+
   const selectedTicker = tickers[symbol] ?? null
   const lastCandle = candles[candles.length - 1]
   const referencePrice = selectedTicker?.price ?? lastCandle?.close ?? 0
   const precision = pricePrecision(referencePrice)
   const hasError = Boolean(tickerError) || Boolean(analysisError)
-  const meta = SYMBOL_META[symbol] ?? SYMBOL_META.BTCUSDT
+  const meta = getSymbolMeta(symbol)
 
   return (
     <div className="min-h-screen bg-background">
@@ -204,7 +281,7 @@ export function MarketDashboard() {
                 AI Crypto Analyst
               </h1>
               <p className="mt-2 max-w-xl text-sm leading-relaxed text-muted-foreground">
-                Живые котировки, свечи и технические индикаторы BTC, ETH и SOL с агрегированной оценкой
+                Живые котировки, свечи и технические индикаторы для списка монет с агрегированной оценкой
                 сигнала. Без подключения биржевых счетов и без реальных сделок.
               </p>
             </div>
@@ -214,7 +291,7 @@ export function MarketDashboard() {
                 <Server className="h-3.5 w-3.5 text-primary" />
                 <div className="leading-tight">
                   <div className="text-[10px] uppercase tracking-wide text-muted-foreground">Источник</div>
-                  <div className="text-[11px] font-medium">Binance Public API</div>
+                  <div className="text-[11px] font-medium">Binance Spot</div>
                 </div>
               </div>
               <div className="panel flex items-center gap-2 px-3 py-2">
@@ -244,22 +321,38 @@ export function MarketDashboard() {
           ) : null}
 
           {/* Карточки */}
-          <section aria-label="Обзор рынка" className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {SYMBOLS.map((item: SymbolKey, index: number) => (
+          <section aria-label="Обзор рынка" className="mt-6">
+            <form onSubmit={(event) => void addTicker(event)} className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-start">
+              <div className="flex flex-1 items-center gap-2">
+                <div className="relative w-full max-w-sm">
+                  <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <Input aria-label="Поиск монеты по тикеру" placeholder="Тикер, например ETH или GRAMUSDT" value={newTicker} onChange={(event) => setNewTicker(event.target.value)} className="pl-9" />
+                </div>
+                <Button type="submit" size="sm" loading={tickerSearchLoading} disabled={tickerSearchLoading}>
+                  <Plus className="mr-1 h-4 w-4" /> Добавить
+                </Button>
+              </div>
+              {watchlistError ? <p role="alert" className="text-xs text-down sm:pt-2">{watchlistError}</p> : null}
+            </form>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {symbols.map((item: SymbolKey, index: number) => (
               <motion.div
                 key={item}
                 initial={{ opacity: 0, y: 14 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4, delay: 0.05 * index, ease: 'easeOut' }}
+                className="relative"
               >
                 <PriceCard
-                  meta={SYMBOL_META[item]}
+                  meta={getSymbolMeta(item)}
                   ticker={tickers[item] ?? null}
                   active={item === symbol}
                   onSelect={setSymbol}
                 />
+                {symbols.length > 1 ? <button type="button" aria-label={`Удалить ${item} из списка`} onClick={() => removeTicker(item)} className="absolute right-2 top-2 z-10 rounded p-1 text-muted-foreground hover:bg-secondary hover:text-foreground"><X className="h-3.5 w-3.5" /></button> : null}
               </motion.div>
             ))}
+            </div>
           </section>
 
           {/* Технический анализ */}
@@ -279,7 +372,7 @@ export function MarketDashboard() {
                   aria-label="Выбор актива"
                   className="flex rounded-lg border border-border bg-card p-0.5"
                 >
-                  {SYMBOLS.map((item: SymbolKey) => (
+                  {symbols.map((item: SymbolKey) => (
                     <button
                       key={item}
                       type="button"
@@ -293,7 +386,7 @@ export function MarketDashboard() {
                           : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
                       )}
                     >
-                      {SYMBOL_META[item].base}
+                      {getSymbolMeta(item).base}
                     </button>
                   ))}
                 </div>

@@ -3,12 +3,7 @@
 
 import type { Candle, Interval, SymbolKey, TickerData } from './market'
 
-const HOSTS = [
-  'https://data-api.binance.vision',
-  'https://api.binance.com',
-  'https://api1.binance.com',
-  'https://api2.binance.com',
-]
+const HOSTS = ['https://data-api.binance.vision']
 
 const REQUEST_TIMEOUT_MS = 9000
 
@@ -34,10 +29,10 @@ function writeCache<T>(key: string, value: T, ttlMs: number): void {
   cache.set(key, { value, expiresAt: Date.now() + ttlMs })
 }
 
-async function binanceGet<T>(path: string): Promise<T> {
+async function binanceGet<T>(path: string, hosts: readonly string[] = HOSTS): Promise<T> {
   let lastError: unknown = null
 
-  for (const host of HOSTS) {
+  for (const host of hosts) {
     try {
       const response = await fetch(`${host}${path}`, {
         cache: 'no-store',
@@ -91,16 +86,21 @@ function mapTicker(raw: RawTicker): TickerData {
 
 export async function fetchTickers(symbols: readonly SymbolKey[]): Promise<TickerData[]> {
   const safeSymbols = symbols.length > 0 ? symbols : (['BTCUSDT'] as const)
-  const key = `tickers:${safeSymbols.join(',')}`
-  const cached = readCache<TickerData[]>(key)
-  if (cached) return cached
-
-  const query = encodeURIComponent(JSON.stringify(safeSymbols))
-  const raw = await binanceGet<RawTicker[]>(`/api/v3/ticker/24hr?symbols=${query}`)
-  const list = Array.isArray(raw) ? raw : []
-  const mapped = list.map((item: RawTicker) => mapTicker(item))
-  writeCache(key, mapped, 5000)
-  return mapped
+  const results = await Promise.allSettled(safeSymbols.map(async (symbol) => {
+    const key = `ticker:${symbol}`
+    const cached = readCache<TickerData>(key)
+    if (cached) return cached
+    const raw = await binanceGet<RawTicker>(`/api/v3/ticker/24hr?symbol=${encodeURIComponent(symbol)}`)
+    const ticker = mapTicker(raw)
+    writeCache(key, ticker, 5000)
+    return ticker
+  }))
+  const tickers = results.flatMap((result) => result.status === 'fulfilled' ? [result.value] : [])
+  if (tickers.length === 0) {
+    const firstError = results.find((result): result is PromiseRejectedResult => result.status === 'rejected')?.reason
+    throw firstError instanceof Error ? firstError : new Error('Не удалось получить котировки Binance Spot')
+  }
+  return tickers
 }
 
 export async function fetchKlines(
@@ -113,7 +113,8 @@ export async function fetchKlines(
   const cached = readCache<Candle[]>(key)
   if (cached) return cached
 
-  const raw = await binanceGet<unknown[]>(`/api/v3/klines?symbol=${symbol}&interval=${interval}&limit=${safeLimit}`)
+  const path = `/api/v3/klines?symbol=${encodeURIComponent(symbol)}&interval=${interval}&limit=${safeLimit}`
+  const raw = await binanceGet<unknown[]>(path)
   const rows = Array.isArray(raw) ? raw : []
 
   const candles: Candle[] = []

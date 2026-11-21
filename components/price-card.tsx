@@ -15,7 +15,7 @@ import { cn } from '@/lib/utils'
 import { formatCompact, formatPercent, formatPrice, formatSigned } from '@/lib/format'
 import { pricePrecision, type SymbolKey, type SymbolMeta, type TickerData } from '@/lib/market'
 
-const ICONS: Record<SymbolKey, LucideIcon> = {
+const ICONS: Partial<Record<SymbolKey, LucideIcon>> = {
   BTCUSDT: Bitcoin,
   ETHUSDT: Gem,
   SOLUSDT: Sun,
