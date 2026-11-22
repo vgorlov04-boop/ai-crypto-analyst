@@ -227,3 +227,254 @@
   0% { color: hsl(var(--down)); }
   100% { color: inherit; }
 }
+
+/* Mobile layout adjustments are scoped to small viewports; desktop rules stay intact. */
+@media (max-width: 767px) {
+  html,
+  body {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: clip;
+  }
+
+  body {
+    min-width: 320px;
+  }
+
+  .mobile-dashboard button {
+    min-height: 44px;
+  }
+
+  .mobile-page-container {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .mobile-site-header-inner {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .mobile-watchlist-fields {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .mobile-ticker-field {
+    min-width: 0;
+    flex: 1 1 0%;
+  }
+
+  .mobile-coin-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .mobile-coin-card {
+    min-width: 0;
+  }
+
+  .mobile-price-card {
+    padding: 10px;
+  }
+
+  .mobile-coin-header {
+    gap: 6px;
+    padding-right: 44px;
+  }
+
+  .mobile-coin-icon {
+    width: 28px;
+    height: 28px;
+    flex: 0 0 28px;
+  }
+
+  .mobile-coin-card .mobile-coin-status {
+    display: none;
+  }
+
+  .mobile-coin-card .mobile-price-value {
+    font-size: clamp(15px, 4.7vw, 19px);
+  }
+
+  .mobile-coin-card .mobile-price-unit {
+    font-size: 9px;
+  }
+
+  .mobile-price-row {
+    margin-top: 10px;
+    gap: 4px;
+    flex-wrap: nowrap;
+  }
+
+  .mobile-change-row {
+    margin-top: 8px;
+    gap: 4px;
+  }
+
+  .mobile-change-row .mobile-change-amount,
+  .mobile-change-row .mobile-change-period,
+  .mobile-change-icon,
+  .mobile-coin-extras {
+    display: none;
+  }
+
+  .mobile-change-value {
+    padding: 2px 5px;
+    font-size: 11px;
+  }
+
+  .mobile-coin-remove {
+    top: 4px;
+    right: 4px;
+    display: grid;
+    min-width: 44px;
+    min-height: 44px;
+    place-items: center;
+    border-radius: 8px;
+  }
+
+  .mobile-analysis-heading,
+  .mobile-chart-heading,
+  .mobile-chart-footer {
+    min-width: 0;
+  }
+
+  .mobile-control-groups,
+  .mobile-symbol-tabs,
+  .mobile-interval-tabs {
+    min-width: 0;
+    max-width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .mobile-symbol-tabs button,
+  .mobile-interval-tabs button {
+    min-width: 44px;
+    min-height: 44px;
+    padding-left: 9px;
+    padding-right: 9px;
+  }
+
+  .mobile-watchlist-fields input {
+    min-height: 44px;
+  }
+
+  .mobile-chart-stage {
+    height: 380px;
+    max-width: 100%;
+  }
+
+  .mobile-chart-stage > div {
+    max-width: 100%;
+  }
+
+  .mobile-chart-legend {
+    min-width: 0;
+    gap: 8px;
+  }
+
+  .mobile-chart-legend > span {
+    white-space: nowrap;
+  }
+
+  .mobile-indicator-column,
+  .mobile-indicator-column > div {
+    min-width: 0;
+  }
+
+  .mobile-refresh-button,
+  .mobile-theme-button,
+  .mobile-add-button {
+    min-width: 44px;
+    min-height: 44px;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  html,
+  body {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: clip;
+  }
+
+  .mobile-dashboard button {
+    min-height: 44px;
+  }
+
+  .mobile-add-button,
+  .mobile-refresh-button,
+  .mobile-theme-button {
+    min-width: 44px;
+  }
+
+  .mobile-symbol-tabs,
+  .mobile-interval-tabs {
+    flex-wrap: wrap;
+  }
+
+  .mobile-symbol-tabs button,
+  .mobile-interval-tabs button {
+    min-height: 44px;
+  }
+}
+
+@media (max-width: 419px) {
+  .mobile-page-container {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .mobile-coin-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .mobile-price-card {
+    padding: 9px;
+  }
+
+  .mobile-coin-icon {
+    display: none;
+  }
+
+  .mobile-watchlist-fields {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .mobile-watchlist-fields > button {
+    width: 100%;
+  }
+
+  .mobile-chart-stage {
+    height: 340px;
+  }
+
+  .mobile-chart-legend > span {
+    gap: 4px;
+  }
+
+  .mobile-analysis-title {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 359px) {
+  .mobile-page-container {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+
+  .mobile-chart-stage {
+    height: 320px;
+  }
+
+  .mobile-chart-legend {
+    width: 100%;
+  }
+
+  .mobile-chart-heading {
+    align-items: flex-start;
+  }
+}

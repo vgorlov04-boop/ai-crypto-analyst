@@ -62,7 +62,7 @@ export function PriceCard({ meta, ticker, active, onSelect }: PriceCardProps) {
       aria-pressed={active}
       aria-label={`Открыть анализ ${meta.base}`}
       className={cn(
-        'panel group relative w-full overflow-hidden p-4 text-left transition-colors duration-normal sm:p-5',
+        'mobile-price-card panel group relative w-full overflow-hidden p-4 text-left transition-colors duration-normal sm:p-5',
         active ? 'border-primary/45' : 'hover:border-border/90 hover:bg-card/80'
       )}
     >
@@ -74,10 +74,10 @@ export function PriceCard({ meta, ticker, active, onSelect }: PriceCardProps) {
         )}
       />
 
-      <div className="flex items-start justify-between gap-3">
-          <div className="flex min-w-0 items-center gap-2.5">
+      <div className="mobile-coin-header flex items-start justify-between gap-3">
+        <div className="flex min-w-0 items-center gap-2.5">
           <span
-            className="flex h-9 w-9 items-center justify-center rounded-lg border border-border/70 bg-secondary/70"
+            className="mobile-coin-icon flex h-9 w-9 items-center justify-center rounded-lg border border-border/70 bg-secondary/70"
             style={{ color: meta.accent }}
           >
             <Icon className="h-4 w-4" strokeWidth={2} />
@@ -97,7 +97,7 @@ export function PriceCard({ meta, ticker, active, onSelect }: PriceCardProps) {
         </span>
       </div>
 
-      <div className="mt-4 flex items-baseline gap-1.5">
+      <div className="mobile-price-row mt-4 flex min-w-0 items-baseline gap-1.5">
         <span
           className={cn(
             'mobile-price-value tabular font-mono text-[26px] font-semibold leading-none tracking-tight sm:text-[28px]',
@@ -109,23 +109,23 @@ export function PriceCard({ meta, ticker, active, onSelect }: PriceCardProps) {
         <span className="mobile-price-unit whitespace-nowrap text-[11px] text-muted-foreground">USDT</span>
       </div>
 
-      <div className="mt-2.5 flex flex-wrap items-center gap-2">
+      <div className="mobile-change-row mt-2.5 flex flex-wrap items-center gap-2">
         <span
           className={cn(
-            'inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-xs font-semibold tabular',
+            'mobile-change-value inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-xs font-semibold tabular',
             isFlat ? 'bg-secondary text-muted-foreground' : isUp ? 'bg-up-soft text-up' : 'bg-down-soft text-down'
           )}
         >
-          <TrendIcon className="h-3.5 w-3.5" strokeWidth={2.5} />
+          <TrendIcon className="mobile-change-icon h-3.5 w-3.5" strokeWidth={2.5} />
           {ticker ? formatPercent(changePercent) : '—'}
         </span>
-        <span className={cn('text-xs tabular', isUp ? 'text-up/80' : isFlat ? 'text-muted-foreground' : 'text-down/80')}>
+        <span className={cn('mobile-change-amount text-xs tabular', isUp ? 'text-up/80' : isFlat ? 'text-muted-foreground' : 'text-down/80')}>
           {ticker ? formatSigned(change, digits) : '—'}
         </span>
-        <span className="text-[10px] uppercase tracking-wide text-muted-foreground/70">за 24ч</span>
+        <span className="mobile-change-period text-[10px] uppercase tracking-wide text-muted-foreground/70">за 24ч</span>
       </div>
 
-      <dl className="mt-4 grid grid-cols-3 gap-2 border-t border-border/60 pt-3">
+      <dl className="mobile-coin-extras mt-4 grid grid-cols-3 gap-2 border-t border-border/60 pt-3">
         <div>
           <dt className="text-[10px] uppercase tracking-wide text-muted-foreground/70">Объём</dt>
           <dd className="tabular mt-0.5 font-mono text-[11px] text-foreground/90">
