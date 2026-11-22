@@ -15,7 +15,7 @@ interface SiteHeaderProps {
 export function SiteHeader({ lastUpdate, hasError, refreshing, onRefresh }: SiteHeaderProps) {
   return (
     <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur-xl">
-      <div className="mx-auto flex h-14 w-full max-w-[1200px] items-center justify-between gap-3 px-4 sm:px-6">
+      <div className="mobile-site-header-inner mx-auto flex h-14 w-full max-w-[1200px] items-center justify-between gap-3 px-4 sm:px-6">
         <div className="flex min-w-0 items-center gap-2.5">
           <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary/55 text-primary-foreground shadow-sm">
             <ChartCandlestick className="h-4 w-4" strokeWidth={2.2} />
@@ -43,7 +43,7 @@ export function SiteHeader({ lastUpdate, hasError, refreshing, onRefresh }: Site
             size="icon-sm"
             onClick={onRefresh}
             aria-label="Обновить данные"
-            className="sm:hidden"
+            className="mobile-refresh-button sm:hidden"
           >
             <RefreshCw className={refreshing ? 'animate-spin' : ''} />
           </Button>

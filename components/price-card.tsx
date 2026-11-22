@@ -75,21 +75,21 @@ export function PriceCard({ meta, ticker, active, onSelect }: PriceCardProps) {
       />
 
       <div className="flex items-start justify-between gap-3">
-        <div className="flex items-center gap-2.5">
+          <div className="flex min-w-0 items-center gap-2.5">
           <span
             className="flex h-9 w-9 items-center justify-center rounded-lg border border-border/70 bg-secondary/70"
             style={{ color: meta.accent }}
           >
             <Icon className="h-4 w-4" strokeWidth={2} />
           </span>
-          <div className="leading-tight">
+          <div className="min-w-0 leading-tight">
             <div className="font-display text-sm font-semibold tracking-tight">{meta.base}</div>
-            <div className="text-[11px] text-muted-foreground">{meta.name}</div>
+            <div className="truncate text-[11px] text-muted-foreground">{meta.name}</div>
           </div>
         </div>
         <span
           className={cn(
-            'rounded-full px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide transition-colors',
+            'mobile-coin-status rounded-full px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide transition-colors',
             active ? 'bg-primary/15 text-primary' : 'bg-secondary/70 text-muted-foreground'
           )}
         >
@@ -100,13 +100,13 @@ export function PriceCard({ meta, ticker, active, onSelect }: PriceCardProps) {
       <div className="mt-4 flex items-baseline gap-1.5">
         <span
           className={cn(
-            'tabular font-mono text-[26px] font-semibold leading-none tracking-tight sm:text-[28px]',
+            'mobile-price-value tabular font-mono text-[26px] font-semibold leading-none tracking-tight sm:text-[28px]',
             flash === 'up' ? 'flash-up' : flash === 'down' ? 'flash-down' : ''
           )}
         >
           {ticker ? formatPrice(price, digits) : '—'}
         </span>
-        <span className="text-[11px] text-muted-foreground">USDT</span>
+        <span className="mobile-price-unit whitespace-nowrap text-[11px] text-muted-foreground">USDT</span>
       </div>
 
       <div className="mt-2.5 flex flex-wrap items-center gap-2">

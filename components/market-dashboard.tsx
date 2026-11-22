@@ -255,7 +255,7 @@ export function MarketDashboard() {
   const meta = getSymbolMeta(symbol)
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="mobile-dashboard min-h-screen bg-background">
       <SiteHeader
         lastUpdate={tickerUpdatedAt}
         hasError={Boolean(tickerError)}
@@ -263,14 +263,14 @@ export function MarketDashboard() {
         onRefresh={() => void refreshAll()}
       />
 
-      <main className="terminal-bg">
-        <div className="mx-auto w-full max-w-[1200px] px-4 pb-14 pt-6 sm:px-6 sm:pt-8">
+      <main className="terminal-bg mobile-terminal-bg">
+        <div className="mobile-page-container mx-auto w-full max-w-[1200px] px-4 pb-14 pt-6 sm:px-6 sm:pt-8">
           {/* Hero */}
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.45, ease: 'easeOut' }}
-            className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between"
+            className="mobile-hero flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between"
           >
             <div className="max-w-2xl">
               <div className="inline-flex items-center gap-1.5 rounded-full border border-border/70 bg-card/60 px-2.5 py-1 text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
@@ -286,7 +286,7 @@ export function MarketDashboard() {
               </p>
             </div>
 
-            <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:items-center">
+            <div className="mobile-source-status grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:items-center">
               <div className="panel flex items-center gap-2 px-3 py-2">
                 <Server className="h-3.5 w-3.5 text-primary" />
                 <div className="leading-tight">
@@ -322,26 +322,26 @@ export function MarketDashboard() {
 
           {/* Карточки */}
           <section aria-label="Обзор рынка" className="mt-6">
-            <form onSubmit={(event) => void addTicker(event)} className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-start">
-              <div className="flex flex-1 items-center gap-2">
-                <div className="relative w-full max-w-sm">
+            <form onSubmit={(event) => void addTicker(event)} className="mobile-watchlist-form mb-3 flex flex-col gap-2 sm:flex-row sm:items-start">
+              <div className="mobile-watchlist-fields flex flex-1 items-center gap-2">
+                <div className="mobile-ticker-field relative w-full max-w-sm">
                   <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                   <Input aria-label="Поиск монеты по тикеру" placeholder="Тикер, например ETH или GRAMUSDT" value={newTicker} onChange={(event) => setNewTicker(event.target.value)} className="pl-9" />
                 </div>
-                <Button type="submit" size="sm" loading={tickerSearchLoading} disabled={tickerSearchLoading}>
+                <Button type="submit" size="sm" loading={tickerSearchLoading} disabled={tickerSearchLoading} className="mobile-add-button">
                   <Plus className="mr-1 h-4 w-4" /> Добавить
                 </Button>
               </div>
               {watchlistError ? <p role="alert" className="text-xs text-down sm:pt-2">{watchlistError}</p> : null}
             </form>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="mobile-coin-grid grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {symbols.map((item: SymbolKey, index: number) => (
               <motion.div
                 key={item}
                 initial={{ opacity: 0, y: 14 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4, delay: 0.05 * index, ease: 'easeOut' }}
-                className="relative"
+                className="mobile-coin-card relative"
               >
                 <PriceCard
                   meta={getSymbolMeta(item)}
@@ -349,7 +349,7 @@ export function MarketDashboard() {
                   active={item === symbol}
                   onSelect={setSymbol}
                 />
-                {symbols.length > 1 ? <button type="button" aria-label={`Удалить ${item} из списка`} onClick={() => removeTicker(item)} className="absolute right-2 top-2 z-10 rounded p-1 text-muted-foreground hover:bg-secondary hover:text-foreground"><X className="h-3.5 w-3.5" /></button> : null}
+                {symbols.length > 1 ? <button type="button" aria-label={`Удалить ${item} из списка`} onClick={() => removeTicker(item)} className="mobile-coin-remove absolute right-2 top-2 z-10 rounded p-1 text-muted-foreground hover:bg-secondary hover:text-foreground"><X className="h-3.5 w-3.5" /></button> : null}
               </motion.div>
             ))}
             </div>
@@ -357,8 +357,8 @@ export function MarketDashboard() {
 
           {/* Технический анализ */}
           <section aria-label="Технический анализ" className="mt-8">
-            <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-              <div className="flex items-center gap-2">
+            <div className="mobile-analysis-heading flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+              <div className="mobile-analysis-title flex items-center gap-2">
                 <BarChart3 className="h-4 w-4 text-primary" />
                 <h2 className="font-display text-lg font-semibold tracking-tight">Технический анализ</h2>
                 <span className="rounded-md bg-secondary px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground">
@@ -366,11 +366,11 @@ export function MarketDashboard() {
                 </span>
               </div>
 
-              <div className="flex flex-wrap items-center gap-2">
+              <div className="mobile-control-groups flex flex-wrap items-center gap-2">
                 <div
                   role="tablist"
                   aria-label="Выбор актива"
-                  className="flex rounded-lg border border-border bg-card p-0.5"
+                  className="mobile-symbol-tabs flex rounded-lg border border-border bg-card p-0.5"
                 >
                   {symbols.map((item: SymbolKey) => (
                     <button
@@ -394,7 +394,7 @@ export function MarketDashboard() {
                 <div
                   role="tablist"
                   aria-label="Таймфрейм"
-                  className="flex rounded-lg border border-border bg-card p-0.5"
+                  className="mobile-interval-tabs flex rounded-lg border border-border bg-card p-0.5"
                 >
                   {INTERVALS.map((item: Interval) => (
                     <button
@@ -419,8 +419,8 @@ export function MarketDashboard() {
 
             <div className="mt-3 grid grid-cols-1 gap-3 lg:grid-cols-[minmax(0,1fr)_340px]">
               {/* График */}
-              <div className="panel self-start overflow-hidden">
-                <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border/60 px-3 py-2.5 sm:px-4">
+              <div className="mobile-chart-panel panel min-w-0 self-start overflow-hidden">
+                <div className="mobile-chart-heading flex flex-wrap items-center justify-between gap-2 border-b border-border/60 px-3 py-2.5 sm:px-4">
                   <div className="flex items-baseline gap-2">
                     <span className="font-display text-sm font-semibold tracking-tight">
                       {meta.base}/USDT
@@ -432,14 +432,14 @@ export function MarketDashboard() {
                       {INTERVAL_LABELS[timeframe]}
                     </span>
                   </div>
-                  <div className="flex flex-wrap items-center gap-3">
+                  <div className="mobile-chart-legend flex flex-wrap items-center gap-3">
                     <LegendDot color="#60a5fa" label="EMA20" />
                     <LegendDot color="#fb923c" label="EMA50" />
                     <LegendDot color="#f87171" label="EMA200" />
                   </div>
                 </div>
 
-                <div className="relative h-[460px] w-full px-1 pb-1 sm:h-[500px] lg:h-[660px]">
+                <div className="mobile-chart-stage relative h-[460px] w-full px-1 pb-1 sm:h-[500px] lg:h-[660px]">
                   {candles.length > 0 ? (
                     <CandlestickChart
                       candles={candles}
@@ -472,7 +472,7 @@ export function MarketDashboard() {
                   )}
                 </div>
 
-                <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border/60 px-3 py-2 sm:px-4">
+                <div className="mobile-chart-footer flex flex-wrap items-center justify-between gap-2 border-t border-border/60 px-3 py-2 sm:px-4">
                   <div className="flex items-center gap-3">
                     <span className="font-mono text-[10px] text-muted-foreground">RSI 14</span>
                     <span className="font-mono text-[10px] text-muted-foreground">MACD 12·26·9</span>
@@ -484,7 +484,7 @@ export function MarketDashboard() {
               </div>
 
               {/* Панель индикаторов */}
-              <div className="self-start">
+              <div className="mobile-indicator-column min-w-0 self-start">
                 <IndicatorsPanel
                   data={indicators}
                   loading={analysisLoading}
